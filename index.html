@@ -86,7 +86,7 @@ td.n { text-align: right; white-space: nowrap; font-family: var(--mono); font-si
     </div>
     <div class="stats">
       <div><b id="sScore">0/0</b>correct</div>
-      <div><b id="sStreak">0</b>streak</div>
+      <div><b id="sLeft">16</b>to go</div>
       <div><b id="sRound">1</b>round</div>
     </div>
   </header>
@@ -114,7 +114,7 @@ td.n { text-align: right; white-space: nowrap; font-family: var(--mono); font-si
       </div>
       <button type="button" class="ghost" id="skip">Show answer</button>
     </div>
-    <div class="feedback idle" id="fb" aria-live="polite">Type your answer and press Enter. A card only counts once you get it right without help; anything you miss comes back.</div>
+    <div class="feedback idle" id="fb" aria-live="polite">Type your answer and press Enter. Every card you get right is done for good. Only the ones you miss come back. Each word comes up twice: French → English and English → French.</div>
   </section>
 
   <section class="card win" id="win" hidden>
@@ -190,7 +190,8 @@ function next() {
   last = cur; cur = pick(); answered = false; gaveUp = false;
   const card = CARDS[cur], [fr, en] = WORDS[card.w];
   $("dir").textContent = card.toFr ? "English → French" : "French → English";
-  $("note").textContent = card.toFr && /^(un|une)/.test(fr) ? "include un / une" : "";
+  const other = st.done[card.toFr ? card.w : card.w + 8];
+  $("note").textContent = [other ? "other way round from one you got" : "", card.toFr && /^(un|une)/.test(fr) ? "include un / une" : ""].filter(Boolean).join(" · ");
   const p = $("prompt"); p.textContent = card.toFr ? en : fr; p.classList.remove("pop"); void p.offsetWidth; p.classList.add("pop");
   $("accents").style.visibility = card.toFr ? "visible" : "hidden";
   const a = $("answer"); a.value = ""; a.className = ""; a.placeholder = card.toFr ? "en français…" : "in English…"; a.focus();
@@ -214,7 +215,8 @@ function check() {
   record(ok);
   answered = true; $("answer").className = ok ? "ok" : "no";
   const left = st.done.filter(d => !d).length;
-  const tail = ok ? (left ? `${left} to go.` : "That's all 16!") : "This one will come back.";
+  const kept = st.done.filter(Boolean).length;
+  const tail = ok ? (left ? `${left} to go.` : "That's all 16!") : `This one will come back. Your ${kept} done card${kept === 1 ? "" : "s"} stay done.`;
   $("fb").className = "feedback " + (ok ? "good" : "bad");
   $("fb").innerHTML = `${msg} <span class="ans">${want}</span><br><small style="color:var(--muted)">${tail} Press Enter to continue.</small>`;
   $("go").textContent = "Next";
@@ -233,7 +235,7 @@ $("skip").onclick = () => {
   const card = CARDS[cur], [fr, en] = WORDS[card.w];
   record(false); answered = true; $("go").textContent = "Next";
   $("fb").className = "feedback bad";
-  $("fb").innerHTML = `The answer is <span class="ans">${card.toFr ? fr.replace(" (m)", "") : en}</span>. It'll come back soon.`;
+  $("fb").innerHTML = `The answer is <span class="ans">${card.toFr ? fr.replace(" (m)", "") : en}</span>. It'll come back soon; the cards you've done stay done.`;
   $("answer").focus();
 };
 document.querySelectorAll("[data-ch]").forEach(b => b.onclick = () => {
@@ -251,7 +253,7 @@ $("reset").onclick = () => {
 
 function render() {
   $("sScore").textContent = `${st.right}/${st.total}`;
-  $("sStreak").textContent = st.streak; $("sRound").textContent = st.round;
+  $("sLeft").textContent = st.done.filter(d => !d).length; $("sRound").textContent = st.round;
   const n = st.done.filter(Boolean).length;
   $("bar").innerHTML = st.done.map(d => `<i class="${d ? "done" : ""}"></i>`).join("");
   $("barLabel").textContent = `${n} of 16 cards done`;
