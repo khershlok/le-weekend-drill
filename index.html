@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Le Week-end Drill</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+:root {
+  --bg: #f1eff6; --card: #fcfbfe; --ink: #221f33; --muted: #625d78; --line: #d5d1e2;
+  --accent: #2b4fb3; --good: #2f7a4f; --bad: #b3352a; --soft: #e7e4f0;
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+  box-sizing: border-box;
+}
+@media (prefers-color-scheme: dark) { :root {
+  --bg: #15131f; --card: #1e1b2b; --ink: #e8e5f2; --muted: #9c97b3; --line: #332f46;
+  --accent: #8aa6ff; --good: #63c08a; --bad: #f07a6c; --soft: #262236; color-scheme: dark } }
+*, *::before, *::after { box-sizing: inherit; }
+[hidden] { display: none !important; }
+html, body { background: var(--bg); color: var(--ink); margin: 0; }
+body { font-family: var(--body); font-size: 16px; line-height: 1.5; padding: 0 16px; }
+.wrap { max-width: 580px; margin: 0 auto; padding: 28px 0 48px; display: flex; flex-direction: column; gap: 20px; }
+
+header { display: flex; justify-content: space-between; align-items: end; gap: 12px; flex-wrap: wrap; }
+h1 { font-family: var(--display); font-weight: 800; font-size: 2rem; margin: 0; letter-spacing: -0.02em; line-height: 1; }
+h1 span { color: var(--accent); }
+.sub { color: var(--muted); font-size: .9rem; margin: 4px 0 0; }
+.stats { display: flex; gap: 18px; font-family: var(--mono); font-size: .8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.stats b { display: block; font-size: 1.25rem; color: var(--ink); font-weight: 500; }
+
+.progress { display: grid; grid-template-columns: repeat(16, 1fr); gap: 4px; }
+.progress i { height: 10px; border-radius: 3px; background: var(--line); transition: background .3s; }
+.progress i.done { background: var(--good); }
+.progress-label { font-size: .85rem; color: var(--muted); margin-top: 6px; }
+
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 26px 24px 24px; display: flex; flex-direction: column; gap: 18px; }
+.label { font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); display: flex; justify-content: space-between; gap: 8px; }
+.label .dir { color: var(--accent); font-weight: 700; }
+.prompt { font-family: var(--display); font-weight: 800; font-size: clamp(1.9rem, 8vw, 2.8rem); line-height: 1.05; margin: 0; text-wrap: balance; }
+
+form { display: flex; gap: 8px; }
+input[type=text] { flex: 1; min-width: 0; font: 500 1.2rem var(--body); padding: 12px 14px; border-radius: 10px; border: 2px solid var(--line); background: var(--bg); color: var(--ink); }
+input[type=text]:focus { outline: none; border-color: var(--ink); }
+input.ok { border-color: var(--good); }
+input.no { border-color: var(--bad); }
+button { font: 700 1rem var(--body); border-radius: 10px; border: 0; cursor: pointer; padding: 12px 18px; }
+button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.primary { background: var(--ink); color: var(--bg); }
+.ghost { background: transparent; color: var(--muted); border: 1px solid var(--line); padding: 8px 12px; font-size: .85rem; }
+.accents { display: flex; gap: 6px; flex-wrap: wrap; }
+.accents button { background: var(--soft); color: var(--ink); padding: 6px 12px; font-size: 1rem; }
+.row { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+.feedback { min-height: 3.2em; border-radius: 10px; padding: 12px 14px; background: var(--soft); font-size: .98rem; }
+.feedback.good { color: var(--good); }
+.feedback.bad { color: var(--bad); }
+.feedback .ans { color: var(--ink); font-weight: 700; }
+.feedback.idle { color: var(--muted); }
+
+.win { text-align: center; padding: 34px 24px; }
+.win h2 { font-family: var(--display); font-size: 2.2rem; margin: 0 0 6px; }
+.win p { color: var(--muted); margin: 0 0 18px; }
+
+details { border-top: 1px solid var(--line); padding-top: 12px; }
+summary { cursor: pointer; color: var(--muted); font-size: .9rem; }
+table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: .92rem; }
+td { padding: 6px 4px; border-bottom: 1px solid var(--line); vertical-align: top; }
+td.n { text-align: right; white-space: nowrap; font-family: var(--mono); font-size: .8rem; color: var(--muted); }
+.tick { color: var(--good); font-weight: 700; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .pop { animation: pop .25s ease-out; }
+  @keyframes pop { from { transform: translateY(6px); opacity: .4; } to { transform: none; opacity: 1; } }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Le <span>Week-end</span></h1>
+      <p class="sub">8 words, both ways. Get all 16 right to finish.</p>
+    </div>
+    <div class="stats">
+      <div><b id="sScore">0/0</b>correct</div>
+      <div><b id="sStreak">0</b>streak</div>
+      <div><b id="sRound">1</b>round</div>
+    </div>
+  </header>
+
+  <div>
+    <div class="progress" id="bar"></div>
+    <div class="progress-label" id="barLabel"></div>
+  </div>
+
+  <section class="card" id="quiz">
+    <div class="label"><span class="dir" id="dir"></span><span id="note"></span></div>
+    <p class="prompt pop" id="prompt"></p>
+    <form id="form" autocomplete="off">
+      <input type="text" id="answer" spellcheck="false" autocapitalize="off" aria-label="Your answer">
+      <button class="primary" id="go" type="submit">Check</button>
+    </form>
+    <div class="row">
+      <div class="accents" id="accents" aria-label="Insert accented letter">
+        <button type="button" data-ch="é">é</button>
+        <button type="button" data-ch="è">è</button>
+        <button type="button" data-ch="ê">ê</button>
+        <button type="button" data-ch="à">à</button>
+        <button type="button" data-ch="ô">ô</button>
+        <button type="button" data-ch="î">î</button>
+      </div>
+      <button type="button" class="ghost" id="skip">Show answer</button>
+    </div>
+    <div class="feedback idle" id="fb" aria-live="polite">Type your answer and press Enter. A card only counts once you get it right without help; anything you miss comes back.</div>
+  </section>
+
+  <section class="card win" id="win" hidden>
+    <h2>Toutes les 16 !</h2>
+    <p id="winText"></p>
+    <div><button class="primary" id="again">Go again</button></div>
+  </section>
+
+  <details>
+    <summary>Word list</summary>
+    <table><tbody id="list"></tbody></table>
+    <div style="margin-top:12px"><button type="button" class="ghost" id="reset">Start over</button></div>
+  </details>
+</div>
+
+<script>
+// [French, English, accepted French answers, accepted English answers]
+const WORDS = [
+  ["un marché aux puces", "a flea market", ["un marché aux puces", "le marché aux puces"], ["flea market", "flea markets"]],
+  ["une exposition", "an exhibition", ["une exposition", "l'exposition"], ["exhibition", "exhibit"]],
+  ["une boîte", "a nightclub", ["une boîte", "la boîte", "une boîte de nuit", "la boîte de nuit"], ["nightclub", "night club", "club"]],
+  ["un stade", "a stadium", ["un stade", "le stade"], ["stadium"]],
+  ["l'argent (m)", "money", ["l'argent", "de l'argent"], ["money"]],
+  ["faire un tour à vélo", "to go for a bike ride", ["faire un tour à vélo"], ["go for a bike ride", "go on a bike ride", "go for a bicycle ride", "go on a bicycle ride", "go for a ride on a bike", "go cycling", "go for a cycle"]],
+  ["faire des achats", "to go shopping", ["faire des achats"], ["go shopping", "do shopping", "do the shopping", "do some shopping", "shop"]],
+  ["ranger sa chambre", "to tidy one's bedroom", ["ranger sa chambre"], ["tidy one's bedroom", "tidy one's room", "tidy your bedroom", "tidy your room", "tidy my bedroom", "tidy my room", "tidy his bedroom", "tidy her bedroom", "tidy his room", "tidy her room", "tidy the bedroom", "tidy bedroom", "tidy room", "tidy up one's bedroom", "tidy up one's room", "tidy up your bedroom", "tidy up your room", "tidy up my bedroom", "tidy up my room"]]
+];
+// 16 cards: 0-7 French→English, 8-15 English→French
+const CARDS = [...WORDS.map((_, i) => ({ w: i, toFr: false })), ...WORDS.map((_, i) => ({ w: i, toFr: true }))];
+
+const $ = id => document.getElementById(id);
+const KEY = "le-weekend-v1";
+const fresh = () => ({ done: CARDS.map(() => false), misses: CARDS.map(() => 0), right: 0, total: 0, streak: 0, round: 1 });
+let st = fresh();
+try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.done && s.done.length === 16) st = s; } catch (e) {}
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} };
+
+let cur = -1, last = -1, answered = false, gaveUp = false;
+
+const norm = s => s.toLowerCase().replace(/[’‘`´]/g, "'").replace(/\s*'\s*/g, "'").replace(/[.!?,]/g, "").replace(/\s+/g, " ").trim();
+const strip = s => s.normalize("NFD").replace(/[̀-ͯ]/g, "");
+const enCore = s => norm(s).replace(/^to /, "").replace(/^(a|an|the|some) /, "").replace(/ones /g, "one's ");
+const frCore = s => norm(s).replace(/^(un |une |le |la |l'|de l')/, "");
+
+function grade(card, raw) {
+  const [fr, en, frOk, enOk] = WORDS[card.w];
+  if (card.toFr) {
+    const got = norm(raw);
+    if (frOk.includes(got)) return { ok: true, msg: "Correct!" };
+    if (frOk.some(a => strip(a) === strip(got))) return { ok: true, msg: "Correct, but watch the accents:" };
+    if (frOk.some(a => strip(frCore(a)) === strip(frCore(got))))
+      return { ok: false, msg: /^(un|une|l')/.test(fr) ? "Right word, but the article is wrong or missing. It's" : "Nearly. It's" };
+    return { ok: false, msg: "Not quite. It's" };
+  } else {
+    const got = enCore(raw);
+    if (enOk.some(a => enCore(a) === got)) return { ok: true, msg: "Correct!" };
+    return { ok: false, msg: "Not quite. It's" };
+  }
+}
+
+function pick() {
+  const left = CARDS.map((_, i) => i).filter(i => !st.done[i]);
+  const pool = left.length > 1 ? left.filter(i => i !== last) : left;
+  // missed cards are more likely to come up
+  const weights = pool.map(i => 1 + 2 * st.misses[i]);
+  let r = Math.random() * weights.reduce((a, b) => a + b, 0);
+  for (let k = 0; k < pool.length; k++) { r -= weights[k]; if (r <= 0) return pool[k]; }
+  return pool[0];
+}
+
+function next() {
+  if (st.done.every(Boolean)) return showWin();
+  last = cur; cur = pick(); answered = false; gaveUp = false;
+  const card = CARDS[cur], [fr, en] = WORDS[card.w];
+  $("dir").textContent = card.toFr ? "English → French" : "French → English";
+  $("note").textContent = card.toFr && /^(un|une)/.test(fr) ? "include un / une" : "";
+  const p = $("prompt"); p.textContent = card.toFr ? en : fr; p.classList.remove("pop"); void p.offsetWidth; p.classList.add("pop");
+  $("accents").style.visibility = card.toFr ? "visible" : "hidden";
+  const a = $("answer"); a.value = ""; a.className = ""; a.placeholder = card.toFr ? "en français…" : "in English…"; a.focus();
+  $("go").textContent = "Check";
+  $("fb").className = "feedback idle"; $("fb").textContent = "Your turn.";
+}
+
+function record(ok) {
+  st.total++;
+  if (ok) { st.right++; st.streak++; st.done[cur] = true; }
+  else { st.streak = 0; st.misses[cur]++; }
+  save(); render();
+}
+
+function check() {
+  if (answered) return next();
+  const raw = $("answer").value; if (!raw.trim()) return;
+  const card = CARDS[cur], [fr, en] = WORDS[card.w];
+  const want = card.toFr ? fr.replace(" (m)", "") : en;
+  const { ok, msg } = grade(card, raw);
+  record(ok);
+  answered = true; $("answer").className = ok ? "ok" : "no";
+  const left = st.done.filter(d => !d).length;
+  const tail = ok ? (left ? `${left} to go.` : "That's all 16!") : "This one will come back.";
+  $("fb").className = "feedback " + (ok ? "good" : "bad");
+  $("fb").innerHTML = `${msg} <span class="ans">${want}</span><br><small style="color:var(--muted)">${tail} Press Enter to continue.</small>`;
+  $("go").textContent = "Next";
+}
+
+function showWin() {
+  $("quiz").hidden = true; $("win").hidden = false;
+  const acc = st.total ? Math.round(100 * st.right / st.total) : 0;
+  $("winText").textContent = `You got every card right. ${st.right} correct out of ${st.total} tries (${acc}%) in round ${st.round}.`;
+  $("again").focus();
+}
+
+$("form").addEventListener("submit", e => { e.preventDefault(); check(); });
+$("skip").onclick = () => {
+  if (answered) return next();
+  const card = CARDS[cur], [fr, en] = WORDS[card.w];
+  record(false); answered = true; $("go").textContent = "Next";
+  $("fb").className = "feedback bad";
+  $("fb").innerHTML = `The answer is <span class="ans">${card.toFr ? fr.replace(" (m)", "") : en}</span>. It'll come back soon.`;
+  $("answer").focus();
+};
+document.querySelectorAll("[data-ch]").forEach(b => b.onclick = () => {
+  const a = $("answer"), s = a.selectionStart ?? a.value.length, e = a.selectionEnd ?? a.value.length;
+  a.value = a.value.slice(0, s) + b.dataset.ch + a.value.slice(e);
+  a.focus(); a.setSelectionRange(s + 1, s + 1);
+});
+$("again").onclick = () => {
+  const round = st.round + 1; st = fresh(); st.round = round; save();
+  $("win").hidden = true; $("quiz").hidden = false; cur = last = -1; render(); next();
+};
+$("reset").onclick = () => {
+  st = fresh(); save(); $("win").hidden = true; $("quiz").hidden = false; cur = last = -1; render(); next();
+};
+
+function render() {
+  $("sScore").textContent = `${st.right}/${st.total}`;
+  $("sStreak").textContent = st.streak; $("sRound").textContent = st.round;
+  const n = st.done.filter(Boolean).length;
+  $("bar").innerHTML = st.done.map(d => `<i class="${d ? "done" : ""}"></i>`).join("");
+  $("barLabel").textContent = `${n} of 16 cards done`;
+  $("list").innerHTML = WORDS.map(([fr, en], i) =>
+    `<tr><td>${fr}</td><td>${en}</td><td class="n">${st.done[i] ? '<span class="tick">FR→EN ✓</span>' : "FR→EN"} · ${st.done[i + 8] ? '<span class="tick">EN→FR ✓</span>' : "EN→FR"}</td></tr>`
+  ).join("");
+}
+
+render(); next();
+</script>
+</body>
+</html>
